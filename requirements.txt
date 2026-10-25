@@ -1,0 +1,7 @@
+openai>=1.40
+google-api-python-client>=2.100
+python-dotenv>=1.0
+pyyaml>=6.0
+
+# 개발용
+pytest>=8.0

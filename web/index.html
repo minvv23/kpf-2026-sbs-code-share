@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>영상 제작용 소스 생성·검색기</title>
+<style>
+  body { margin: 0 auto; max-width: 960px; padding: 20px; font-family: sans-serif; }
+  textarea { width: 100%; height: 200px; box-sizing: border-box; }
+  .row { display: flex; gap: 12px; align-items: center; margin: 10px 0; flex-wrap: wrap; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+  .grid img { width: 100%; }
+  footer { margin-top: 40px; font-size: 12px; color: #777; }
+</style>
+</head>
+<body>
+<h1>영상 제작용 소스 생성·검색기</h1>
+
+<section>
+  <div class="row"><input type="file" id="file" accept=".txt"></div>
+  <textarea id="script" placeholder="영상 대본을 붙여 넣으세요."></textarea>
+  <div class="row">
+    <label>이슈 지역
+      <select id="region"><option value="global">해외</option><option value="domestic">국내</option></select>
+    </label>
+    <label>검색 기준 날짜 <input id="date" placeholder="YYYYMMDD (비우면 오늘)"></label>
+    <button id="zip" disabled>결과물 일괄 다운로드 (zip)</button>
+    <button id="run">생성·조회 시작</button>
+  </div>
+  <div id="status"></div>
+</section>
+
+<section><h2>검색어</h2><div id="queries"></div></section>
+<section><h2>에셋 이미지</h2><div id="assets" class="grid"></div></section>
+<section><h2>자료화면 후보</h2><ol id="footage"></ol></section>
+
+<footer>본 시스템(서비스)은 한국언론진흥재단의 지원을 받아 개발되었습니다.</footer>
+
+<script>
+  // API 주소는 각사 환경에 맞게 지정한다 (docs/data_format.md 참고).
+  const API = "";
+
+  document.getElementById("file").onchange = async (e) => {
+    const f = e.target.files[0];
+    if (f) document.getElementById("script").value = await f.text();
+  };
+
+  document.getElementById("run").onclick = async () => {
+    const status = document.getElementById("status");
+    if (!API) { status.textContent = "API 주소가 설정되지 않았습니다."; return; }
+    status.textContent = "처리 중...";
+    const body = {
+      script: document.getElementById("script").value,
+      region: document.getElementById("region").value,
+      date: document.getElementById("date").value,
+    };
+    const data = await fetch(`${API}/run`, { method: "POST", body: JSON.stringify(body) }).then(r => r.json());
+    document.getElementById("queries").textContent = (data.queries || []).join(", ");
+    document.getElementById("footage").innerHTML = (data.footage || [])
+      .map(v => `<li><a href="${v.url}" target="_blank">${v.title}</a> (${v.channel})</li>`).join("");
+    status.textContent = "완료";
+    document.getElementById("zip").disabled = false;
+  };
+</script>
+</body>
+</html>

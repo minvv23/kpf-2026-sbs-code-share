@@ -1,0 +1,13 @@
+# config/settings.yaml 로 복사해 사용. 환경변수가 있으면 환경변수가 우선한다.
+output_dir: ./output
+log_level: INFO
+
+image_model: ""
+image_size: 1024x1024
+image_workers: 2
+
+search_max_results: 10
+top_n: 10
+
+n_queries: 3
+n_keywords: 5
